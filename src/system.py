@@ -25,7 +25,7 @@ class AAC:
         z = x[2]
         
         
-        Fr = self.f0 * v**2 + self.f1 * v + self.f2
+        Fr = self.f0  + self.f1 * v + self.f2 * v**2
         
         f = vertcat(
             v,

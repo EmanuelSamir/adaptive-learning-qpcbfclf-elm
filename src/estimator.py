@@ -9,6 +9,17 @@ from scipy.linalg import pinv2
 from casadi import *
 import casadi
 
+class EstimatorDummy:
+    def __init__(self):
+        pass
+
+    def forward(self, x, u, t, train=False):
+        return None
+    
+    def train(self, t, data):
+        pass
+
+
 class EstimatorNN:
     def __init__(self, input_size, hidden_size, output_size, lr = 1e-4):
         self.e_f = NN(input_size, hidden_size, output_size)

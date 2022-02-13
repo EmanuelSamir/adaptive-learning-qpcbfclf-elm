@@ -39,8 +39,8 @@ dt = 0.01
 simTime = 20
 
 # Real parameters
-v_lead = 20
-v_des = 23
+v_lead = 22
+v_des = 24
 m  = 1650.0
 g = 9.81
 
@@ -103,11 +103,11 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    lr_pres =  [5e-2, 1e-3, 5e-3]   #[1e-2, 1e-3]
-    lr_posts =  [5e-2, 1e-3, 5e-3]  #[1e-2]
-    z0s = [30]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [24]#[20,22,24,26]
-    funcs = [square, sin] # Square or sin
+    lr_pres =  [1e-3]   #[1e-2, 1e-3]
+    lr_posts =  [1e-3]  #[1e-2]
+    z0s = [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [20,22,24,26] # [20]#[20,22,24,26]
+    funcs = [step, sin, square] # Square or sin
 
     # Path for saving data
     data_dir = '../data/elm'

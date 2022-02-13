@@ -40,7 +40,7 @@ dt = 0.01
 simTime = 20
 
 # Real parameters
-v_lead = 20
+v_lead = 22
 v_des = 24
 m  = 1650.0
 g = 9.81
@@ -102,10 +102,10 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    lrs =  [1e-2] #[1e-2, 1e-3, 1e-4, 1e-5]
-    z0s = [30]  #[30, 34, 38]
-    v0s = [20]
-    funcs = [square, sin] 
+    lrs =  [1e-3] #[1e-2, 1e-3, 1e-4, 1e-5]
+    z0s = [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [20,22,24,26] # [20]#[20,22,24,26]
+    funcs = [step, sin, square] # Square or sin
 
     # Path for saving data
     data_dir = '../data/sgd'
