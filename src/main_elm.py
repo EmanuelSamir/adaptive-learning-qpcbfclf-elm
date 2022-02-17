@@ -35,7 +35,7 @@ from normalizer import *
 from functions import *
 
 # Parameters
-dt = 0.01
+dt = 0.05
 simTime = 20
 
 # Real parameters
@@ -105,9 +105,9 @@ def main():
     ########################################
     lr_pres =  [1e-3]   #[1e-2, 1e-3]
     lr_posts =  [1e-3]  #[1e-2]
-    z0s = [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [20,22,24,26] # [20]#[20,22,24,26]
-    funcs = [step, sin, square] # Square or sin
+    z0s = [28] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [20]# ,22,24,26] # [20]#[20,22,24,26]
+    funcs = [step]#, sin, square] # Square or sin
 
     # Path for saving data
     data_dir = '../data/elm'
@@ -177,7 +177,9 @@ def main():
 
             # Update new state
             x = x_n
-
+            print(x[2])
+            ego_pos = x[0]
+            opp_pos = x[0] + x[2]
             pbar.update(1)
                     
     pbar.close()
