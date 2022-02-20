@@ -96,7 +96,8 @@ class LCBF:
         gqp = vertcat( -dV - self.clf_rate*V + slack, dS + self.cbf_rate * h)     
         qp = {'x': vertcat(u,slack), 'f':fqp, 'g':gqp}
         S = nlpsol('S', 'ipopt', qp,{'verbose':False,'print_time':False, "ipopt": {"print_level": 0}})
-        r = S(lbg=0, lbx = -self.m*self.cd*self.g/self.delta, ubx = self.m*self.ca*self.g/self.delta)
+        r = S(lbg=0)#, lbx = -self.m*self.cd*self.g/self.delta, ubx = self.m*self.ca*self.g/self.delta)
+
         
         # Solutions
         if normalizer:

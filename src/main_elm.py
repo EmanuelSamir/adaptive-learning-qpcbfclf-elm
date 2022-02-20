@@ -9,7 +9,8 @@ import pandas as pd
 import itertools
 from argparse import ArgumentParser
 import logging
-
+import copy
+import time
 
 # For dataset
 from collections import deque, namedtuple
@@ -57,7 +58,7 @@ f0_nom = 10*f0
 f1_nom = 10*f1
 f2_nom = 10*f2
 
-m_nom = 0.8*m
+m_nom = m
 
 # QP-CLF-CBF parameters
 p_slack = 2e-2
@@ -94,9 +95,13 @@ def main():
     x_dim = 3
     u_dim = 1
 
-    kp = np.array([[0, 0.2, 0]])
-    kd = np.array([[0, 1e-3, 0]])
-    ki = np.array([[0, 0.2, 0]])
+    # kp = np.array([[0, 0.2, 0]])
+    # kd = np.array([[0, 1e-3, 0]])
+    # ki = np.array([[0, 0.2, 0]])
+
+    kp = np.array([[0, 1.0e3, 0]])
+    kd = np.array([[0, 0.1, 0]])
+    ki = np.array([[0, 1.0e3, 0]])
 
     pid = PID(x_dim, u_dim, kp, kd, ki, dt)
 
@@ -105,8 +110,8 @@ def main():
     ########################################
     lr_pres =  [1e-3]   #[1e-2, 1e-3]
     lr_posts =  [1e-3]  #[1e-2]
-    z0s = [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [20,22,24,26] # [20]#[20,22,24,26]
+    z0s = [34] # [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [22] #[20,22,24,26] # [20]#[20,22,24,26]
     funcs = [step, sin, square] # Square or sin
 
     # Path for saving data
@@ -148,7 +153,7 @@ def main():
             # Get reference control input: u_ref
             e = np.array([[0], [v_des], [0]]) - np.expand_dims(x, axis = 1)
             u_ref = pid.update(e)
-            u_ref = u_ref[0,0]
+            u_ref = u_ref[0,0]/5000
         
             # Simulate dynamic uncertainty
             unct = func(t)
@@ -156,6 +161,8 @@ def main():
 
             # Controller
             k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref, estimator, t) 
+
+            k = np.clip(k, a_min = -m*c_d*g/5000, a_max = m*c_a*g/5000 )
         
             # System update
             x_n = aac.update(x, k, t, dt)
@@ -164,8 +171,16 @@ def main():
             dh_real = derivator.update(h)
             dhe_real = dh_real - dh
 
+
+            x_u = copy.copy(x)
+            x_u[0] = 0
+
+            
             # Update dataset
-            dataset.update(t, x, k, dhe_real)
+            dataset.update(t, x_u, k, dhe_real)
+
+            # Update dataset
+            # dataset.update(t, x, k, dhe_real)
 
             # Update estimator: Training
             estimator.train(t, dataset)
@@ -178,7 +193,9 @@ def main():
             # Update new state
             x = x_n
 
+            #print(df_row)
             pbar.update(1)
+            #time.sleep(0.5)
                     
     pbar.close()
 
