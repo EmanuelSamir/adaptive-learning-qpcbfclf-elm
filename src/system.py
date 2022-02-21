@@ -4,7 +4,7 @@ from qpsolvers import solve_qp
 from scipy.integrate import solve_ivp
 from casadi import *
 
-class AAC:
+class ACC:
     def __init__(self, m, c_d, f0, f1, f2, v_lead, delta = 5000):
         self.m = m
         self.c_d = c_d

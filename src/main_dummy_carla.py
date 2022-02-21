@@ -100,9 +100,6 @@ def game_loop(args):
     hidden_size = 100
     output_size = 1
 
-    learned_ratio = 1.5
-    time_th = learned_ratio* hidden_size
-
     ########################################
     #    PID control reference
     ########################################
@@ -118,25 +115,22 @@ def game_loop(args):
     ########################################
     #    Training parameters or initial states
     ########################################
-    lr_pres =  [1e-3]   #[1e-2, 1e-3]
-    lr_posts =  [1e-3]  #[1e-2]
     z0s = [28] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
     v0s = [20,22,24,26] # [20]#[20,22,24,26]
     funcs = [step]#, sin, square] # Square or sin
 
     # Path for saving data
-    data_dir = '../data/elm'
+    data_dir = '../data/dummy-carla'
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
     # Total of cases
-    cases = len(list(itertools.product(lr_pres, lr_posts, z0s, v0s, funcs)))
+    cases = len(list(itertools.product(z0s, v0s, funcs)))
     pbar = tqdm(total=cases*simTime/dt)
 
     pygame.init()
     pygame.font.init()
     world = None
-    
     try:
         client = carla.Client(args.host, args.port)
         client.set_timeout(2.0)
@@ -162,10 +156,11 @@ def game_loop(args):
             world.render(display)
             client.get_world().tick()
             pygame.display.flip()
+            print("HERE")
         
         print("Starting automated waypoint follower")
     
-        for lr_pre, lr_post, z0, v0, func in itertools.product(lr_pres, lr_posts, z0s, v0s, funcs):
+        for z0, v0, func in itertools.product(z0s, v0s, funcs):
             # Add waypoint markers
             world.restart(z0)
             t = world.player.get_transform()
@@ -188,7 +183,7 @@ def game_loop(args):
             ####################################################
             ##############  Save data
             ####################################################
-            fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
+            fn = "z0_{}_v0_{}_func_{}.csv".format(z0, v0, func.__name__)
             column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 
             df = pd.DataFrame(columns=column_names,dtype=object)
@@ -203,10 +198,10 @@ def game_loop(args):
             x = [0, v0, z0]
             
             # Estimator
-            estimator = EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
+            estimator = EstimatorDummy()
             
             ## Dataset
-            dataset = ELMDataset(dt, ('x', 'k', 'dhe_real'), time_th)
+            dataset = NNDataset(('x', 'k', 'dhe_real'))
 
             for t in np.arange(0, simTime, dt): #simTime
                 t1 = hud.simulation_time
@@ -249,7 +244,7 @@ def game_loop(args):
                 dhe_real = dh_real - dh
 
                 # Update dataset
-                dataset.update(t, x, k, dhe_real)
+                dataset.update(x, k, dhe_real)
 
                 # Update estimator: Training
                 estimator.train(t, dataset)
