@@ -34,7 +34,7 @@ class LCBF:
     def dclf(self, x, u):
         v = x[1]
         Fr = self.f0 + self.f1 * v + self.f2 * v**2 
-        dV = (v - self.v_des)*(2/self.m*(u - Fr))
+        dV = (v - self.v_des)*(2/self.m*(u*self.delta - Fr))
         return dV
         
     def cbf(self, x, isMaxCD=False):
@@ -54,7 +54,7 @@ class LCBF:
         if isMaxCD:
             dh = 1/self.m * (self.Th + (v - self.v_lead)/self.cd/self.g ) * (Fr - u) + (self.v_lead - v)
         else:
-            dh = self.Th/self.m * (Fr - u) + self.v_lead - v
+            dh = self.Th/self.m * (Fr - u*self.delta) + self.v_lead - v
         return dh
 
 

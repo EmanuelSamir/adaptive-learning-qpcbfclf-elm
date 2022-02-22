@@ -166,11 +166,11 @@ def game_loop(args):
             t = world.player.get_transform()
             t_opp = world.opponent.get_transform()
             angle_heading = t.rotation.yaw * pi/ 180
-            world.player.set_velocity(carla.Vector3D(float(v0*math.cos(angle_heading)),float(v0*math.sin(angle_heading)),0))
+            world.player.set_target_velocity(carla.Vector3D(float(v0*math.cos(angle_heading)),float(v0*math.sin(angle_heading)),0))
             world.player.apply_control(carla.VehicleControl(throttle=1, brake=0, steer=0, manual_gear_shift=True, gear=4))
             
             if SCENE == 'one_vehicle' :
-                world.opponent.set_velocity(carla.Vector3D(float(v_lead*math.cos(angle_heading)),float(v_lead*math.sin(angle_heading)),0))
+                world.opponent.set_target_velocity(carla.Vector3D(float(v_lead*math.cos(angle_heading)),float(v_lead*math.sin(angle_heading)),0))
                 world.opponent.apply_control(carla.VehicleControl(throttle=1, brake=0, steer=0, manual_gear_shift=True, gear=4))
             
 
