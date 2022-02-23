@@ -26,10 +26,10 @@ class Derivator:
 def step(t, th = 5, A = 5):    
     return 0 if t > th else A
 
-def square(t, w = 3, A = 5):
+def square(t, w = 1.2, A = 5):
     return -A if np.sin(w*t) < 0 else A
     
-def sin(t, w = 3, A = 5):
+def sin(t, w = 1.2, A = 5):
     return A*np.sin(w*t)
 
 

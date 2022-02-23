@@ -37,24 +37,21 @@ class LCBF:
         dV = (v - self.v_des)*(2/self.m*(self.delta*u - Fr))
         return dV
         
-    def cbf(self, x, isMaxCD=False):
+    def cbf(self, x):
         v = x[1]
         z = x[2]
-        if isMaxCD:
-            h = z - self.Th * v - 0.5  * (self.v_lead - v)**2 / (self.cd * self.g)
-        else:
-            h = z - self.Th * v 
+  
+
+        h = z - self.Th * v 
         return h
         
-    def dcbf(self, x, u, isMaxCD=False):
+    def dcbf(self, x, u):
         v = x[1]
         z = x[2]
         
         Fr = self.f0 * v**2 + self.f1 * v + self.f2
-        if isMaxCD:
-            dh = 1/self.m * (self.Th + (v - self.v_lead)/self.cd/self.g ) * (Fr - u) + (self.v_lead - v)
-        else:
-            dh = self.Th/self.m * (Fr - self.delta*u) + self.v_lead - v
+        dh = self.Th/self.m * (Fr - self.delta*u) + self.v_lead - v
+
         return dh
 
 
@@ -92,8 +89,8 @@ class LCBF:
         
         # QP optimizer
         weight_input = 2/self.m**2
-        fqp = (u_ref - u)**2 * weight_input + self.p_slack * slack**2
-        gqp = vertcat( -dV - self.clf_rate*V + slack, dS + self.cbf_rate * h)     
+        fqp = (u_ref - u)**2 * weight_input + self.p_slack * 5000*slack**2
+        gqp = vertcat( -dV - self.clf_rate*V + 5000*slack, dS + self.cbf_rate * h)     
         qp = {'x': vertcat(u,slack), 'f':fqp, 'g':gqp}
         S = nlpsol('S', 'ipopt', qp,{'verbose':False,'print_time':False, "ipopt": {"print_level": 0}})
         r = S(lbg=0, lbx = -self.m*self.cd*self.g/self.delta, ubx = self.m*self.ca*self.g/self.delta)

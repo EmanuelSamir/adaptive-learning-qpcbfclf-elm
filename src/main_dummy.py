@@ -58,7 +58,7 @@ f0_nom = 10*f0
 f1_nom = 10*f1
 f2_nom = 10*f2
 
-m_nom = 0.8*m
+m_nom = 0.75*m
 
 # QP-CLF-CBF parameters
 p_slack = 2e-2
@@ -93,9 +93,10 @@ def main():
     x_dim = 3
     u_dim = 1
 
-    kp = np.array([[0, 0.2, 0]])
-    kd = np.array([[0, 1e-3, 0]])
-    ki = np.array([[0, 0.2, 0]])
+    kp = np.array([[0, 1.0e3, 0]])
+    kd = np.array([[0, 0.1, 0]])
+    ki = np.array([[0, 1.0e3, 0]])
+
 
     pid = PID(x_dim, u_dim, kp, kd, ki, dt)
 
@@ -103,12 +104,13 @@ def main():
     #    Training parameters or initial states
     ########################################
     lrs =  [1e-2] #[1e-2, 1e-3, 1e-4, 1e-5]
-    z0s = [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [20,22,24,26] # [20]#[20,22,24,26]
+    z0s = [34]#[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [22]#[20,22,24,26] # [20]#[20,22,24,26]
     funcs = [step, sin, square]
 
     # Path for saving data
-    data_dir = '../data/dummy'
+    #data_dir = '../data/dummy'
+    data_dir = '../data/exp'
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -121,7 +123,8 @@ def main():
         ####################################################
         ##############  Save data
         ####################################################
-        fn = "lr_{}_z0_{}_v0_{}_func_{}.csv".format(lr, z0, v0, func.__name__)
+        #fn = "lr_{}_z0_{}_v0_{}_func_{}.csv".format(lr, z0, v0, func.__name__)
+        fn = "dummy_{}.csv".format(func.__name__)
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 
         df = pd.DataFrame(columns=column_names,dtype=object)
@@ -146,7 +149,7 @@ def main():
             # Get reference control input: u_ref
             e = np.array([[0], [v_des], [0]]) - np.expand_dims(x, axis = 1)
             u_ref = pid.update(e)
-            u_ref = u_ref[0,0]
+            u_ref = u_ref[0,0]/5000
         
             # Simulate dynamic uncertainty
             unct = func(t)

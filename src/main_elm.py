@@ -58,7 +58,7 @@ f0_nom = 10*f0
 f1_nom = 10*f1
 f2_nom = 10*f2
 
-m_nom = m
+m_nom = 0.75*m
 
 # QP-CLF-CBF parameters
 p_slack = 2e-2
@@ -86,7 +86,7 @@ def main():
     hidden_size = 100
     output_size = 1
 
-    learned_ratio = 1.5
+    learned_ratio = 3.0
     time_th = learned_ratio* hidden_size
 
     ########################################
@@ -108,14 +108,16 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    lr_pres =  [1e-3]   #[1e-2, 1e-3]
+    lr_pres =  [1e-4]   #[1e-2, 1e-3]
     lr_posts =  [1e-3]  #[1e-2]
     z0s = [34] # [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
     v0s = [22] #[20,22,24,26] # [20]#[20,22,24,26]
     funcs = [step, sin, square] # Square or sin
 
     # Path for saving data
-    data_dir = '../data/elm'
+    #data_dir = '../data/elm'
+    data_dir = '../data/exp'
+
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -128,7 +130,9 @@ def main():
         ####################################################
         ##############  Save data
         ####################################################
-        fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
+        # fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
+        fn = "oFW_elm_{}.csv".format(func.__name__)
+
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 
         df = pd.DataFrame(columns=column_names,dtype=object)
@@ -162,8 +166,6 @@ def main():
             # Controller
             k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref, estimator, t) 
 
-            k = np.clip(k, a_min = -m*c_d*g/5000, a_max = m*c_a*g/5000 )
-        
             # System update
             x_n = aac.update(x, k, t, dt)
 

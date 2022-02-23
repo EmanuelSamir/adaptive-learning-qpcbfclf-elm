@@ -93,11 +93,11 @@ class LCBF:
         
         # QP optimizer
         weight_input = 2/self.m**2
-        fqp = (u_ref - u)**2 * weight_input + self.p_slack * slack**2
-        gqp = vertcat( -dV - self.clf_rate*V + slack, dS + self.cbf_rate * h)     
+        fqp = (u_ref - u)**2 * weight_input + self.p_slack * self.delta*slack**2
+        gqp = vertcat( -dV - self.clf_rate*V + self.delta*slack, dS + self.cbf_rate * h)     
         qp = {'x': vertcat(u,slack), 'f':fqp, 'g':gqp}
         S = nlpsol('S', 'ipopt', qp,{'verbose':False,'print_time':False, "ipopt": {"print_level": 0}})
-        r = S(lbg=0)#, lbx = -self.m*self.cd*self.g/self.delta, ubx = self.m*self.ca*self.g/self.delta)
+        r = S(lbg=0, lbx = -self.m*self.cd*self.g/self.delta, ubx = self.m*self.ca*self.g/self.delta)
         
         # Solutions
         if normalizer:
