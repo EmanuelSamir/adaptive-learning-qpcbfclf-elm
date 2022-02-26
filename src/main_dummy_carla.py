@@ -123,7 +123,7 @@ def game_loop(args):
     lr_posts =  [1e-3]  #[1e-2]
     z0s = [28] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
     v0s = [18]#,17,19,20] 
-    funcs = [step]#, sin, square] # Square or sin
+    funcs = [sin, square] # Square or sin
 
     # Path for saving data
     data_dir = '../data/elm'
@@ -204,7 +204,7 @@ def game_loop(args):
             x = [0, v0, z0]
             
             # Estimator
-            estimator = EstimatorDummy()#EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
+            estimator = EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
             
             ## Dataset
             dataset = ELMDataset(dt, ('x', 'k', 'dhe_real'), time_th)
@@ -242,7 +242,7 @@ def game_loop(args):
                 dhe_real = dh_real - dh
 
                 # Update dataset
-                dataset.update(t, x, k, dhe_real)
+                dataset.update(float(t), np.array(x).astype(float), float(k), float(dhe_real))
 
                 # Update estimator: Training
                 estimator.train(t, dataset)
