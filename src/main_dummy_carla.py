@@ -63,8 +63,8 @@ f0 = 0*m
 f1 = 0.182*m
 f2 = -0.0004*m
 
-c_a = 0.3
-c_d = 0.3
+c_a = 0.45
+c_d = 0.45
 Th = 1.8
 
 # Nominal parameters
