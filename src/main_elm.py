@@ -40,7 +40,7 @@ simTime = 20
 
 # Real parameters
 v_lead = 22
-v_des = 24
+v_des = 26
 m  = 1650.0
 g = 9.81
 
@@ -153,10 +153,10 @@ def main():
             # Simulate dynamic uncertainty
             unct = func(t)
             acc.v_lead = v_lead + unct  # lead_vehicle
-
+            print("u_ref : ", u_ref)
             # Controller
             k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref, estimator, t) 
-        
+            print("k : ", k)
             # System update
             x_n = acc.update(x, k, t, dt)
 

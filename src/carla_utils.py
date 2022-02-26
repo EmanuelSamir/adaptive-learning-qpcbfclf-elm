@@ -30,7 +30,7 @@ except IndexError:
 
 # FROM 'one_vehicle','standalone','one_vehicle_turn'
 SCENE = 'one_vehicle'
-
+m = 1395
 import carla
 
 from carla import ColorConverter as cc
@@ -240,8 +240,8 @@ class World(object):
                 spawn_point.rotation.yaw = 0
                 self.opponent = self.world.try_spawn_actor(blueprint, spawn_point)
             
-        for i in range(10) :
-            self.world.tick()
+        # for i in range(40) :
+        #     self.world.tick()
             
         self.collision_sensor = CollisionSensor(self.player, self.hud)
         self.lane_invasion_sensor = LaneInvasionSensor(self.player, self.hud)
@@ -253,9 +253,9 @@ class World(object):
         actor_type = get_actor_display_name(self.player)
         self.hud.notification(actor_type)
         actors = self.world.get_actors()
+        print("Everything assigned")
         for i in range(10) :
             self.world.tick()
-        print("Everything assigned")
         vehicle = self.player#random.choice([actor for actor in actors if 'vehicle' in actor.type_id])
         front_left_wheel  = carla.WheelPhysicsControl(tire_friction=1.5, damping_rate=1.5, max_steer_angle=70.0)#, long_stiff_value=1000)
         front_right_wheel = carla.WheelPhysicsControl(tire_friction=1.5, damping_rate=1.5, max_steer_angle=70.0)#, long_stiff_value=1000)
@@ -267,8 +267,11 @@ class World(object):
         # physics_control.wheels[1].tire_friction=1
         # physics_control.wheels[2].tire_friction=1
         # physics_control.wheels[3].tire_friction=1
+        global m
+        m = physics_control.mass
+        print("Updated mass : ", m)
         physics_control.wheels = wheels
-        vehicle.apply_physics_control(physics_control)
+        # vehicle.apply_physics_control(physics_control)
         # print(physics_control)
         for i in range(10) :
             self.world.tick()
