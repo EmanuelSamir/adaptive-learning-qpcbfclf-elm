@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import math
 from sys import path as sys_path
 from os import path as os_path, times
-
+    
 # For dataset
 from collections import deque, namedtuple
 import random
@@ -49,35 +49,34 @@ from functions import *
 from carla_utils import *
 
 # Parameters
-dt = 0.05
+dt = 0.1
 simTime = 20
 
 # Real parameters
-v_lead = 15
-v_des = 17
-# m  = 1650.0
-print("mass : ", m)
+v_lead = 22
+v_des = 24
+m  = 1650.0
 g = 9.81
 
-f0 = 0*m
-f1 = 0.182*m
-f2 = -0.0004*m
+f0 = 0.1
+f1 = 5
+f2 = 0.25
 
 c_a = 0.3
 c_d = 0.3
 Th = 1.8
 
 # Nominal parameters
-f0_nom = f0
-f1_nom = f1
-f2_nom = f2
+f0_nom = 10*f0
+f1_nom = 10*f1
+f2_nom = 10*f2
 
-m_nom = m
+m_nom = 0.8*m
 
 # QP-CLF-CBF parameters
-p_slack = 1e-2
+p_slack = 2e-2
 clf_rate = 5
-cbf_rate = 5
+cbf_rate = 5.
 
 torch.manual_seed(42)
 
@@ -111,7 +110,7 @@ def game_loop(args):
     u_dim = 1
 
     kp = np.array([[0, 0.2, 0]])
-    kd = np.array([[0, 0, 0]])
+    kd = np.array([[0, 1e-3, 0]])
     ki = np.array([[0, 0.2, 0]])
 
     pid = PID(x_dim, u_dim, kp, kd, ki, dt)
@@ -122,7 +121,7 @@ def game_loop(args):
     lr_pres =  [1e-3]   #[1e-2, 1e-3]
     lr_posts =  [1e-3]  #[1e-2]
     z0s = [28] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [18]#,17,19,20] 
+    v0s = [20,22,24,26] # [20]#[20,22,24,26]
     funcs = [step]#, sin, square] # Square or sin
 
     # Path for saving data
@@ -165,7 +164,7 @@ def game_loop(args):
             pygame.display.flip()
         
         print("Starting automated waypoint follower")
-        vel_accs = []
+    
         for lr_pre, lr_post, z0, v0, func in itertools.product(lr_pres, lr_posts, z0s, v0s, funcs):
             # Add waypoint markers
             world.restart(z0)
@@ -173,11 +172,11 @@ def game_loop(args):
             t_opp = world.opponent.get_transform()
             angle_heading = t.rotation.yaw * pi/ 180
             world.player.set_velocity(carla.Vector3D(float(v0*math.cos(angle_heading)),float(v0*math.sin(angle_heading)),0))
-            world.player.apply_control(carla.VehicleControl(throttle=0, brake=0, steer=0, manual_gear_shift=True, gear=4))
+            world.player.apply_control(carla.VehicleControl(throttle=1, brake=0, steer=0, manual_gear_shift=True, gear=4))
             
             if SCENE == 'one_vehicle' :
                 world.opponent.set_velocity(carla.Vector3D(float(v_lead*math.cos(angle_heading)),float(v_lead*math.sin(angle_heading)),0))
-                world.opponent.apply_control(carla.VehicleControl(throttle=0, brake=0, steer=0, manual_gear_shift=True, gear=4))
+                world.opponent.apply_control(carla.VehicleControl(throttle=1, brake=0, steer=0, manual_gear_shift=True, gear=4))
             
 
             start_x = t.location.x
@@ -204,7 +203,7 @@ def game_loop(args):
             x = [0, v0, z0]
             
             # Estimator
-            estimator = EstimatorDummy()#EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
+            estimator = EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
             
             ## Dataset
             dataset = ELMDataset(dt, ('x', 'k', 'dhe_real'), time_th)
@@ -228,9 +227,8 @@ def game_loop(args):
                 angle_heading = tr.rotation.yaw * pi/ 180
                 vx = v.x
                 vy = v.y
-                x[0] = (px-start_x) + vx*dt
-                x[1] = vx + world.imu_sensor.accelerometer[0]*dt
-                x[2] = x_obst-px + (acc.v_lead - vx)*dt
+                
+        
                 # Get reference control input: u_ref
                 e = np.array([[0], [v_des], [0]]) - np.expand_dims(x, axis = 1)
                 u_ref = pid.update(e)
@@ -241,11 +239,11 @@ def game_loop(args):
                 acc.v_lead = v_lead + unct  # lead_vehicle
 
                 # Controller
-                k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref+(f0+f1*v_des+f2*v_des**2)/15000, estimator, t) 
+                k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref, estimator, t) 
             
                 # System update
-                # x_n = acc.update(x, k, t, dt)
-                world.player.add_impulse(carla.Vector3D(float(15000*k*dt),0,0))
+                x_n = acc.update(x, k, t, dt)
+
                 # Obtaining label: dhe_real
                 dh_real = derivator.update(h)
                 dhe_real = dh_real - dh
@@ -260,32 +258,23 @@ def game_loop(args):
                 row = c2l(x) + c2l(k) + c2l(u_ref) + c2l(V) + c2l(h) + c2l(dhe_real) + c2l(dhe) + c2l(slack_sol)
                 df_row = pd.DataFrame(dict(zip(column_names, row)), index = [0])
                 df.append(df_row, sort = False).to_csv(path, index=False, mode = 'a', header=False)
-                # print("func : ", x[2],x[1],x_obst-px-Th*vx,x[2]-Th*x[1])
+
                 # Update new state
-                # x = x_n
-                # ego_pos = x[0]
-                # opp_pos = x_obst
+                x = x_n
+                ego_pos = x[0]
+                opp_pos = x[0] + x[2]
                 pbar.update(1)
-                # curr_loc_ego = tr.location
-                # curr_loc_ego.x = start_x + ego_pos
+                curr_loc_ego = tr.location
+                curr_loc_ego.x = start_x + ego_pos
                 curr_loc_opp = t_opp.location
-                curr_loc_opp.x = x_obst + acc.v_lead*dt
-                # world.player.set_location(curr_loc_ego)
+                curr_loc_opp.x = start_x + opp_pos
+                world.player.set_location(curr_loc_ego)
                 world.opponent.set_location(curr_loc_opp)
-                # world.player.set_angular_velocity(carla.Vector3D(0,0,0))
-                world.player.apply_control(carla.VehicleControl(throttle=0, brake=0, steer=-0.01*tr.rotation.yaw, manual_gear_shift=True, gear=4))
-                # print(x,k,dt,float(15000*k*dt))
-                # print("Yaw :", tr.rotation.yaw)
-                v = world.player.get_velocity()
-                vel_accs.append([hud.simulation_time,math.sqrt(v.x**2 + v.y**2),world.imu_sensor.accelerometer[0],world.imu_sensor.accelerometer[1]])
-            
-                # print("z :", u_ref+(f0+f1*v_des+f2*v_des**2)/15000, vx, x[1], k)
+                print(x[2])
                 world.tick(clock)
                 client.get_world().tick()
                 world.render(display)
                 pygame.display.flip()
-        
-        np.savetxt('speed_comp.csv',np.array(vel_accs))
     finally:
 
         if (world and world.recording_enabled):
@@ -362,4 +351,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
