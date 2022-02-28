@@ -7,7 +7,7 @@ from scipy.integrate import solve_ivp
 from casadi import *
 
 class LCBF:
-    def __init__(self, m_nom, ca_nom, cd_nom, f0_nom, f1_nom, f2_nom, v_lead_nom, v_des, Th, clf_rate, cbf_rate, p_slack, delta = 5000):
+    def __init__(self, m_nom, ca_nom, cd_nom, f0_nom, f1_nom, f2_nom, v_lead_nom, v_des, Th, clf_rate, cbf_rate, p_slack, delta = 15000):
         self.g = 9.81
         self.m = m_nom
         self.ca = ca_nom
@@ -34,7 +34,7 @@ class LCBF:
     def dclf(self, x, u):
         v = x[1]
         Fr = self.f0 + self.f1 * v + self.f2 * v**2 
-        dV = (v - self.v_des)*(2/self.m*(u *self.delta- Fr))
+        dV = (v - self.v_des)*(2/self.m*(u*self.delta - Fr))
         return dV
         
     def cbf(self, x, isMaxCD=False):
@@ -97,7 +97,7 @@ class LCBF:
         gqp = vertcat( -dV - self.clf_rate*V + self.delta*slack, dS + self.cbf_rate * h)     
         qp = {'x': vertcat(u,slack), 'f':fqp, 'g':gqp}
         S = nlpsol('S', 'ipopt', qp,{'verbose':False,'print_time':False, "ipopt": {"print_level": 0}})
-        r = S(lbg=0, lbx = -self.m*self.cd*self.g/self.delta, ubx = self.m*self.ca*self.g/self.delta)
+        r = S(lbg=0, lbx = [-self.m*self.cd*self.g/self.delta,-10000], ubx = [self.m*self.ca*self.g/self.delta,10000])
         
         # Solutions
         if normalizer:

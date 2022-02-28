@@ -28,7 +28,7 @@ import torch
 import torch.nn.functional as F
 
 # Project packages
-from system import AAC
+from system import ACC
 from controller import LCBF, PID
 from dataset import ELMDataset, NNDataset
 from estimator import *
@@ -36,12 +36,12 @@ from normalizer import *
 from functions import *
 
 # Parameters
-dt = 0.01
+dt = 0.05
 simTime = 20
 
 # Real parameters
 v_lead = 22
-v_des = 24
+v_des = 26
 m  = 1650.0
 g = 9.81
 
@@ -71,7 +71,7 @@ def main():
     ########################################
     #    System
     ########################################
-    aac = AAC(m, c_d, f0, f1, f2, v_lead)
+    acc = ACC(m, c_d, f0, f1, f2, v_lead)
     derivator = Derivator(dt)
 
     ########################################
@@ -161,13 +161,12 @@ def main():
         
             # Simulate dynamic uncertainty
             unct = func(t)
-            aac.v_lead = v_lead + unct  # lead_vehicle
-
+            acc.v_lead = v_lead + unct  # lead_vehicle
+            print("u_ref : ", u_ref)
             # Controller
             k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref, estimator, t) 
-
             # System update
-            x_n = aac.update(x, k, t, dt)
+            x_n = acc.update(x, k, t, dt)
 
             # Obtaining label: dhe_real
             dh_real = derivator.update(h)
