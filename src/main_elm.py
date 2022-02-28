@@ -108,8 +108,8 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    lr_pres =  [1e-4]   #[1e-2, 1e-3]
-    lr_posts =  [1e-3]  #[1e-2]
+    lr_pres =  [1e-3]   #[1e-2, 1e-3]
+    lr_posts =  [1e-2]  #[1e-2]
     z0s = [34] # [28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
     v0s = [22] #[20,22,24,26] # [20]#[20,22,24,26]
     funcs = [step, sin, square] # Square or sin
@@ -131,7 +131,7 @@ def main():
         ##############  Save data
         ####################################################
         # fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
-        fn = "oFW_elm_{}.csv".format(func.__name__)
+        fn = "elm_{}.csv".format(func.__name__)
 
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 

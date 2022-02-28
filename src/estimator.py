@@ -103,8 +103,8 @@ class ELM:
     def weights_init(self, m):
         classname = m.__class__.__name__
         if classname.find('Linear') != -1:
-            m.weight.data.fill_(0.0)
-            # m.weight.data.normal_(0.0, 1.0)
+            # m.weight.data.fill_(0.0)
+            m.weight.data.normal_(0.0, 0.01)
             m.bias.data.fill_(0.0)
 
 
@@ -142,7 +142,7 @@ class EstimatorELM:
         
 
     def forward(self, x, u, t, train=False):
-        if True:#self.first_trained: # t / self.dt > self.time_th and 
+        if self.first_trained: # t / self.dt > self.time_th and  #True:#
             ef = self.e_f.forward(x, train)
             eg = self.e_g.forward(x, train)
             return ef + eg * u          
@@ -151,8 +151,8 @@ class EstimatorELM:
         
     def train(self, t, data):
         
-        if True: #t / self.dt >= self.time_th:
-            if False:# not self.first_trained:
+        if t / self.dt >= self.time_th: # True: #
+            if  not self.first_trained: # False:#
                 opts = self.opts_pre
                 self.first_trained = True
                 epochs = 50
