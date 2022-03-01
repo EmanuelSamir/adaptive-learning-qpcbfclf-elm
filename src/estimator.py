@@ -54,6 +54,8 @@ class NN:
     def __init__(self, input_size, hidden_size, output_size = 1):
         self.model = nn.Sequential(
                                   nn.Linear(input_size, hidden_size),                   nn.Sigmoid(),
+                                  nn.Linear(hidden_size, hidden_size),                  nn.Sigmoid(),
+                                  nn.Linear(hidden_size, hidden_size),                  nn.Sigmoid(),
                                   nn.Linear(hidden_size, output_size)
                                 )
         
@@ -63,7 +65,8 @@ class NN:
     def weights_init(self, m):
         classname = m.__class__.__name__
         if classname.find('Linear') != -1:
-            m.weight.data.fill_(0.0)
+            m.weight.data.normal_(0.0, 1.0)
+            #m.weight.data.fill_(0.0)
             m.bias.data.fill_(0.0)
 
 
@@ -104,7 +107,7 @@ class ELM:
         classname = m.__class__.__name__
         if classname.find('Linear') != -1:
             # m.weight.data.fill_(0.0)
-            m.weight.data.normal_(0.0, 0.01)
+            m.weight.data.normal_(0.0, 1.0)
             m.bias.data.fill_(0.0)
 
 

@@ -103,28 +103,27 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    lrs =  [1e-2] #[1e-2, 1e-3, 1e-4, 1e-5]
-    z0s = [34]#[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [22]#[20,22,24,26] # [20]#[20,22,24,26]
+    z0s = [28,32,36] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [20,22,24] # [20]#[20,22,24,26]
     funcs = [step, sin, square]
 
     # Path for saving data
-    #data_dir = '../data/dummy'
-    data_dir = '../data/exp'
+    data_dir = '../data/dummy'
+    #data_dir = '../data/exp'
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
     # Total of cases
-    cases = len(list(itertools.product(lrs, z0s, v0s, funcs)))
+    cases = len(list(itertools.product(z0s, v0s, funcs)))
     pbar = tqdm(total=cases*simTime/dt)
 
-    for lr, z0, v0, func in itertools.product(lrs, z0s, v0s, funcs):
+    for z0, v0, func in itertools.product(z0s, v0s, funcs):
 
         ####################################################
         ##############  Save data
         ####################################################
-        #fn = "lr_{}_z0_{}_v0_{}_func_{}.csv".format(lr, z0, v0, func.__name__)
-        fn = "dummy_{}.csv".format(func.__name__)
+        fn = "z0_{}_v0_{}_func_{}.csv".format(z0, v0, func.__name__)
+        # fn = "dummy_{}.csv".format(func.__name__)
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 
         df = pd.DataFrame(columns=column_names,dtype=object)
@@ -168,7 +167,6 @@ def main():
             x_u = copy.copy(x)
             x_u[0] = 0
 
-            
             # Update dataset
             dataset.update(x_u, k, dhe_real)
 

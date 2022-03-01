@@ -72,7 +72,7 @@ f0_nom = f0
 f1_nom = f1
 f2_nom = f2
 
-m_nom = m
+m_nom = 0.75*m
 
 # QP-CLF-CBF parameters
 p_slack = 1e-2
@@ -123,10 +123,10 @@ def game_loop(args):
     lr_posts =  [1e-3]  #[1e-2]
     z0s = [28] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
     v0s = [18]#,17,19,20] 
-    funcs = [sin, square] # Square or sin
+    funcs = [step, sin, square] # Square or sin
 
     # Path for saving data
-    data_dir = '../data/elm'
+    data_dir = '../data/elm_carla'
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -148,6 +148,7 @@ def game_loop(args):
         # world_load = client.load_world(args.map)
         hud = HUD(args.width, args.height)
         world = World(client.get_world(), hud, args)
+        print("here")
         controller = KeyboardControl(world, args.autopilot)
         settings = client.get_world().get_settings()
         settings.synchronous_mode = True # Enables synchronous mode
@@ -184,7 +185,6 @@ def game_loop(args):
             start_y = t.location.y
             start_x_opp = t_opp.location.x
             start_y_opp = t_opp.location.y
-            
             curr_speed = 0
             ####################################################
             ##############  Save data
@@ -233,7 +233,7 @@ def game_loop(args):
 
                 # Controller
                 k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref+(f0+f1*v_des+f2*v_des**2)/15000, estimator, t) 
-            
+                print(k)
                 # System update
                 # x_n = acc.update(x, k, t, dt)
                 world.player.add_impulse(carla.Vector3D(float(15000*k*dt),0,0))

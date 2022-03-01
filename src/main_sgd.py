@@ -105,13 +105,13 @@ def main():
     #    Training parameters or initial states
     ########################################
     lrs =  [1e-3] #[1e-2, 1e-3, 1e-4, 1e-5]
-    z0s = [34] #28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [22]#[20,22,24,26] # [20]#[20,22,24,26]
-    funcs = [step, sin, square] # Square or sin
+    z0s = [38]#[28,32,36] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [22]#[20,22,24] # [20]#[20,22,24,26]
+    funcs = [step, sin, square]
 
     # Path for saving data
-    #data_dir = '../data/sgd'
-    data_dir = '../data/exp'
+    data_dir = '../data/sgd'
+    #data_dir = '../data/exp'
     
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
@@ -125,8 +125,8 @@ def main():
         ####################################################
         ##############  Save data
         ####################################################
-        #fn = "lr_{}_z0_{}_v0_{}_func_{}.csv".format(lr, z0, v0, func.__name__)
-        fn = "sgd_{}.csv".format(func.__name__)
+        fn = "lr_{}_z0_{}_v0_{}_func_{}.csv".format(lr, z0, v0, func.__name__)
+        #fn = "sgd_{}.csv".format(func.__name__)
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 
         df = pd.DataFrame(columns=column_names,dtype=object)
