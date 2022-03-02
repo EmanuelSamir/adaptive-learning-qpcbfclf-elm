@@ -49,8 +49,8 @@ f0 = 0.1
 f1 = 5
 f2 = 0.25
 
-c_a = 0.3
-c_d = 0.3
+c_a = 0.4
+c_d = 0.4
 Th = 1.8
 
 # Nominal parameters
@@ -86,7 +86,7 @@ def main():
     hidden_size = 100
     output_size = 1
 
-    learned_ratio = 3.0
+    learned_ratio = 1.1
     time_th = learned_ratio* hidden_size
 
     ########################################
@@ -110,9 +110,9 @@ def main():
     ########################################
     lr_pres =  [1e-3]   #[1e-2, 1e-3]
     lr_posts =  [1e-3]  #[1e-2]
-    z0s = [38]#[28,32,36] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [22]#[20,22,24] # [20]#[20,22,24,26]
-    funcs = [step, sin, square]
+    z0s = [42]#[28,32,36] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [20]#[20,22,24] # [20]#[20,22,24,26]
+    funcs = [step, sin]
 
     # Path for saving data
     data_dir = '../data/elm'
@@ -133,7 +133,7 @@ def main():
         fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
         # fn = "elm_{}.csv".format(func.__name__)
 
-        column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
+        column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack','v_lead']
 
         df = pd.DataFrame(columns=column_names,dtype=object)
         path = os.path.join(data_dir, fn)
@@ -187,7 +187,7 @@ def main():
             estimator.train(t, dataset)
 
             # Update data saved
-            row = c2l(x) + c2l(k) + c2l(u_ref) + c2l(V) + c2l(h) + c2l(dhe_real) + c2l(dhe) + c2l(slack_sol)
+            row = c2l(x) + c2l(k) + c2l(u_ref) + c2l(V) + c2l(h) + c2l(dhe_real) + c2l(dhe) + c2l(slack_sol) + c2l(acc.v_lead) 
             df_row = pd.DataFrame(dict(zip(column_names, row)), index = [0])
             df.append(df_row, sort = False).to_csv(path, index=False, mode = 'a', header=False)
 
