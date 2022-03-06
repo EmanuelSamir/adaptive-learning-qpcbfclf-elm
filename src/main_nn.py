@@ -111,8 +111,7 @@ def main():
 
 
     # Path for saving data
-    data_dir = '../data/sgd'
-    #data_dir = '../data/exp'
+    data_dir = '../data/nn'
     
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
@@ -127,7 +126,7 @@ def main():
         ##############  Save data
         ####################################################
         fn = "lr_{}_z0_{}_v0_{}_func_{}.csv".format(lr, z0, v0, func.__name__)
-        #fn = "sgd_{}.csv".format(func.__name__)
+
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
 
         df = pd.DataFrame(columns=column_names,dtype=object)
@@ -192,12 +191,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # parser = ArgumentParser(description='Parameters for estimators')
-    # parser.add_argument('--estimator', dest='estimator', type=str, help='Estimator type: NN or ELM')
-    # parser.add_argument('--', dest='surname', type=str, help='Surname of the candidate')
-    # parser.add_argument('--age', dest='age', type=int, help='Age of the candidate')
-
-    # args = parser.parse_args()
     try:
         main()
     except KeyboardInterrupt:

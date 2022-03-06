@@ -119,15 +119,14 @@ def game_loop(args):
     ########################################
     #    Training parameters or initial states
     ########################################
-    lr_pres =  [1e-3]   #[1e-2, 1e-3]
-    lr_posts =  [1e-2]  #[1e-2]
-    z0s = [34] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [12]#,17,19,20] 
-    funcs = [step, sin]#, square]# Square or sin
+    lr_pres =  [1e-3]   
+    lr_posts =  [1e-2] 
+    z0s = [34]
+    v0s = [12] 
+    funcs = [step, sin]
 
 
     # Path for saving data
-    #data_dir = '../data/elm'
     data_dir = '../data/dummy_carla'
     
     if not os.path.exists(data_dir):
@@ -189,6 +188,7 @@ def game_loop(args):
             start_x_opp = t_opp.location.x
             start_y_opp = t_opp.location.y
             curr_speed = 0
+
             ####################################################
             ##############  Save data
             ####################################################
@@ -207,7 +207,7 @@ def game_loop(args):
             x = [0, v0, z0]
             
             # Estimator
-            estimator = EstimatorDummy()# EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
+            estimator = EstimatorDummy()
             
             ## Dataset
             dataset = ELMDataset(dt, ('x', 'k', 'dhe_real'), time_th)
@@ -236,10 +236,10 @@ def game_loop(args):
 
                 # Controller
                 k, slack_sol, V, dV, h, dh, dhe, dS = cont.compute_controller(x, u_ref+(f0+f1*v_des+f2*v_des**2)/15000, estimator, t) 
-                print(k)
+
                 # System update
-                # x_n = acc.update(x, k, t, dt)
                 world.player.add_impulse(carla.Vector3D(float(15000*k*dt),0,0))
+
                 # Obtaining label: dhe_real
                 dh_real = derivator.update(h)
                 dhe_real = dh_real - dh

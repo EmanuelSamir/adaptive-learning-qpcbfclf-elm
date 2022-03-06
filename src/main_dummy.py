@@ -103,13 +103,13 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    z0s = [42]#[28,32,36] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [20]#[20,22,24] # [20]#[20,22,24,26]
+    z0s = [42]
+    v0s = [20]
     funcs = [step, sin]
 
     # Path for saving data
     data_dir = '../data/dummy'
-    #data_dir = '../data/exp'
+
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -187,12 +187,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # parser = ArgumentParser(description='Parameters for estimators')
-    # parser.add_argument('--estimator', dest='estimator', type=str, help='Estimator type: NN or ELM')
-    # parser.add_argument('--', dest='surname', type=str, help='Surname of the candidate')
-    # parser.add_argument('--age', dest='age', type=int, help='Age of the candidate')
-
-    # args = parser.parse_args()
     try:
         main()
     except KeyboardInterrupt:

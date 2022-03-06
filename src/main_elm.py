@@ -95,10 +95,6 @@ def main():
     x_dim = 3
     u_dim = 1
 
-    # kp = np.array([[0, 0.2, 0]])
-    # kd = np.array([[0, 1e-3, 0]])
-    # ki = np.array([[0, 0.2, 0]])
-
     kp = np.array([[0, 1.0e3, 0]])
     kd = np.array([[0, 0.1, 0]])
     ki = np.array([[0, 1.0e3, 0]])
@@ -108,15 +104,14 @@ def main():
     ########################################
     #    Training parameters or initial states
     ########################################
-    lr_pres =  [1e-3]   #[1e-2, 1e-3]
-    lr_posts =  [1e-3]  #[1e-2]
-    z0s = [42]#[28,32,36] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [20]#[20,22,24] # [20]#[20,22,24,26]
+    lr_pres =  [1e-3]   
+    lr_posts =  [1e-3] 
+    z0s = [42]
+    v0s = [20]
     funcs = [step, sin]
 
     # Path for saving data
     data_dir = '../data/elm'
-    #data_dir = '../data/exp'
 
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
@@ -131,7 +126,6 @@ def main():
         ##############  Save data
         ####################################################
         fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
-        # fn = "elm_{}.csv".format(func.__name__)
 
         column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack','v_lead']
 
@@ -172,16 +166,12 @@ def main():
             dh_real = derivator.update(h)
             dhe_real = dh_real - dh
 
-
+            # Set position datapoint as zero
             x_u = copy.copy(x)
             x_u[0] = 0
 
-            
             # Update dataset
             dataset.update(t, x_u, k, dhe_real)
-
-            # Update dataset
-            # dataset.update(t, x, k, dhe_real)
 
             # Update estimator: Training
             estimator.train(t, dataset)
@@ -194,20 +184,12 @@ def main():
             # Update new state
             x = x_n
 
-            #print(df_row)
             pbar.update(1)
-            #time.sleep(0.5)
                     
     pbar.close()
 
 
 if __name__ == "__main__":
-    # parser = ArgumentParser(description='Parameters for estimators')
-    # parser.add_argument('--estimator', dest='estimator', type=str, help='Estimator type: NN or ELM')
-    # parser.add_argument('--', dest='surname', type=str, help='Surname of the candidate')
-    # parser.add_argument('--age', dest='age', type=int, help='Age of the candidate')
-
-    # args = parser.parse_args()
     try:
         main()
     except KeyboardInterrupt:
