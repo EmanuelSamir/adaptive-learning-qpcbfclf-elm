@@ -2,5 +2,5 @@ notebook/.ipynb_checkpoints
 data/
 *.pyc
 notebook/
-,vscode
+.vscode
 .ipynb_checkpoints
