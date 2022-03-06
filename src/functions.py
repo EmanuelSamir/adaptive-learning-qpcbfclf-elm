@@ -23,13 +23,13 @@ class Derivator:
         return dx
     
    
-def step(t, th = 5, A = 2):    
-    return 0 if t > th else -A
+def step(t, th = 20, A = 2):    
+    return 0 if t > th else A
 
-def square(t, w = 0.6, A = 2):
+def square(t, w = 0.5, A = 2):
     return -A if np.sin(w*t) < 0 else A
     
-def sin(t, w = 0.6, A = 2):
+def sin(t, w = 0.5, A = 2):
     return A*np.sin(w*t)
 
 

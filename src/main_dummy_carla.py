@@ -50,11 +50,11 @@ from carla_utils import *
 
 # Parameters
 dt = 0.05
-simTime = 20
+simTime = 40
 
 # Real parameters
 v_lead = 15
-v_des = 17
+v_des = 18
 # m  = 1650.0
 print("mass : ", m)
 g = 9.81
@@ -63,16 +63,16 @@ f0 = 0*m
 f1 = 0.182*m
 f2 = -0.0004*m
 
-c_a = 0.45
-c_d = 0.45
+c_a = 0.8
+c_d = 0.8
 Th = 1.8
 
 # Nominal parameters
-f0_nom = f0
-f1_nom = f1
-f2_nom = f2
+f0_nom = 2*f0
+f1_nom = 2*f1
+f2_nom = 2*f2
 
-m_nom = 0.75*m
+m_nom = 0.75* m
 
 # QP-CLF-CBF parameters
 p_slack = 1e-2
@@ -101,7 +101,7 @@ def game_loop(args):
     hidden_size = 100
     output_size = 1
 
-    learned_ratio = 1.5
+    learned_ratio = 1.1
     time_th = learned_ratio* hidden_size
 
     ########################################
@@ -120,13 +120,16 @@ def game_loop(args):
     #    Training parameters or initial states
     ########################################
     lr_pres =  [1e-3]   #[1e-2, 1e-3]
-    lr_posts =  [1e-3]  #[1e-2]
-    z0s = [28] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
-    v0s = [18]#,17,19,20] 
-    funcs = [step, sin, square] # Square or sin
+    lr_posts =  [1e-2]  #[1e-2]
+    z0s = [34] #[28,30,32,34,38] #[36]#[30,32,34,38]  #[30, 34, 38]
+    v0s = [12]#,17,19,20] 
+    funcs = [step, sin]#, square]# Square or sin
+
 
     # Path for saving data
-    data_dir = '../data/elm_carla'
+    #data_dir = '../data/elm'
+    data_dir = '../data/dummy_carla'
+    
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -173,11 +176,11 @@ def game_loop(args):
             t = world.player.get_transform()
             t_opp = world.opponent.get_transform()
             angle_heading = t.rotation.yaw * pi/ 180
-            world.player.set_velocity(carla.Vector3D(float(v0*math.cos(angle_heading)),float(v0*math.sin(angle_heading)),0))
+            world.player.set_target_velocity(carla.Vector3D(float(v0*math.cos(angle_heading)),float(v0*math.sin(angle_heading)),0))
             world.player.apply_control(carla.VehicleControl(throttle=0, brake=0, steer=0, manual_gear_shift=True, gear=4))
             
             if SCENE == 'one_vehicle' :
-                world.opponent.set_velocity(carla.Vector3D(float(v_lead*math.cos(angle_heading)),float(v_lead*math.sin(angle_heading)),0))
+                world.opponent.set_target_velocity(carla.Vector3D(float(v_lead*math.cos(angle_heading)),float(v_lead*math.sin(angle_heading)),0))
                 world.opponent.apply_control(carla.VehicleControl(throttle=0, brake=0, steer=0, manual_gear_shift=True, gear=4))
             
 
@@ -190,7 +193,7 @@ def game_loop(args):
             ##############  Save data
             ####################################################
             fn = "lr_pre_{}_lr_post_{}_z0_{}_v0_{}_func_{}.csv".format(lr_pre, lr_post, z0, v0, func.__name__)
-            column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack']
+            column_names = ['p', 'v', 'z', 'u','u_ref','V','h','dhe_real','dhe','slack','v_lead']
 
             df = pd.DataFrame(columns=column_names,dtype=object)
             path = os.path.join(data_dir, fn)
@@ -204,7 +207,7 @@ def game_loop(args):
             x = [0, v0, z0]
             
             # Estimator
-            estimator = EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
+            estimator = EstimatorDummy()# EstimatorELM(input_size, hidden_size, output_size, time_th, dt, lr_pre, lr_post)
             
             ## Dataset
             dataset = ELMDataset(dt, ('x', 'k', 'dhe_real'), time_th)
@@ -248,7 +251,7 @@ def game_loop(args):
                 estimator.train(t, dataset)
 
                 # Update data saved
-                row = c2l(x) + c2l(k) + c2l(u_ref) + c2l(V) + c2l(h) + c2l(dhe_real) + c2l(dhe) + c2l(slack_sol)
+                row = c2l(x) + c2l(k) + c2l(u_ref) + c2l(V) + c2l(h) + c2l(dhe_real) + c2l(dhe) + c2l(slack_sol) + c2l(acc.v_lead)
                 df_row = pd.DataFrame(dict(zip(column_names, row)), index = [0])
                 df.append(df_row, sort = False).to_csv(path, index=False, mode = 'a', header=False)
                 # print("func : ", x[2],x[1],x_obst-px-Th*vx,x[2]-Th*x[1])
